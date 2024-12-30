@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import ReactPlayer from "react-player";
+import { getBlobUrl } from "./fetch-video";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -12,7 +13,8 @@ function App() {
   //   "https://stream.vgm.tv/ipfs/bafybeie65uuexn4xu2v5a5ibyvyyw6elvyp2levkjixv264itxn5uvw7mq/playlist.m3u8";
 
   const playVideo = (url: string) => {
-    setVideoUrl(url); // Set the video URL to play
+    // setVideoUrl(url); // Set the video URL to play
+    getBlobUrl(url);
   };
 
   async function greet() {
