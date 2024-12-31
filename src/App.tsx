@@ -12,9 +12,9 @@ function App() {
   // const videoUrl =
   //   "https://stream.vgm.tv/ipfs/bafybeie65uuexn4xu2v5a5ibyvyyw6elvyp2levkjixv264itxn5uvw7mq/playlist.m3u8";
 
-  const playVideo = (url: string) => {
-    // setVideoUrl(url); // Set the video URL to play
-    getBlobUrl(url);
+  const playVideo = async (url: string) => {
+    const urlPlaylist = await getBlobUrl(url, true);
+    setVideoUrl(urlPlaylist);
   };
 
   async function greet() {
