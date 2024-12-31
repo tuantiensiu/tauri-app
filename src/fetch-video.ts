@@ -6,7 +6,6 @@ export const getBlobUrl = async (
   isVideo: boolean
 ) => {
   const baseUrl = playUrl.substring(0, playUrl.lastIndexOf('/'));
-  console.log("baseUrl", baseUrl);
   
   const reader = new M3U8FileParser();
   const fetchItems = isVideo 
@@ -26,33 +25,26 @@ export const getBlobUrl = async (
   let m3u8List = await Promise.all(fetchUrls).then(res => res.filter(gateway => gateway));
   let playlistM3u8 = isVideo ? m3u8List.find(f => f?.file === "playlist.m3u8")?.res : "";
   const key = m3u8List.find(k => k?.file === "key.vgmk")?.res as ArrayBuffer;
-  console.log("key", key);
   
   m3u8List = m3u8List.filter(f => f?.file !== "playlist.m3u8" && f?.file !== "key.vgmk");
 
   await reader.read(m3u8List[0]?.res);
   const m3u8 = await reader.getResult();
   const IV = m3u8.segments[0].key.iv.replace('0x', '').slice(0, 4);
-  
   const modifyKey = decrypt(new Uint8Array(key), IV, false) ;
   const keyBlob = new Blob([modifyKey], { type: "application/octet-stream" });
   const keyUrl = URL.createObjectURL(keyBlob);
-  fetch(keyUrl).then(res => res.text()).then(console.log); 
-
   const modifiedM3u8List = m3u8List.map(x => {
       const modifyM3u8 = typeof x?.res === 'string' 
           ? x.res.replace(/(\d+p\/\w+\.vgmx)/g, `${baseUrl}/$1`).replace("key.vgmk", keyUrl) 
           : '';
       const m3u8Blob = new Blob([modifyM3u8], { type: "application/x-mpegURL" });
       const m3u8Url = URL.createObjectURL(m3u8Blob);
-      fetch(m3u8Url).then(res => res.text()).then(console.log);
       return {
           file: x?.file,
           url: m3u8Url
       };
   });
-  console.log("modifiedM3u8List", modifiedM3u8List);
-  
 
   if (isVideo) {
       modifiedM3u8List.forEach((f) => {
@@ -64,11 +56,6 @@ export const getBlobUrl = async (
       });
       const playlistBlob = new Blob([playlistM3u8 || ''], { type: "application/x-mpegURL" });
       const playlistUrl = URL.createObjectURL(playlistBlob);
-      console.log("playlistUrl", playlistUrl, playlistBlob.size);
-      fetch(playlistUrl).then(res => res.text()).then(console.log);
-      setTimeout(() => {
-        
-      }, 2000);
       return playlistUrl;
   } else {
       return modifiedM3u8List[0].url;

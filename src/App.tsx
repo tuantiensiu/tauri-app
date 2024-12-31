@@ -1,16 +1,32 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import ReactPlayer from "react-player";
+import videojs from "video.js";
 import { getBlobUrl } from "./fetch-video";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
   const [videoUrl, setVideoUrl] = useState(""); // state to store the video URL
-  // const videoUrl =
-  //   "https://stream.vgm.tv/ipfs/bafybeie65uuexn4xu2v5a5ibyvyyw6elvyp2levkjixv264itxn5uvw7mq/playlist.m3u8";
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (videoUrl) {
+      const player = videojs(videoRef.current!, {
+        controls: true,
+        responsive: true,
+        fluid: true,
+      });
+      player.src({ type: "application/x-mpegURL", src: videoUrl });
+      return () => {
+        if (player) {
+          player.dispose(); // Clean up player instance on unmount
+        }
+      };
+    }
+  }, [videoUrl]);
 
   const playVideo = async (url: string) => {
     const urlPlaylist = await getBlobUrl(url, true);
@@ -55,12 +71,9 @@ function App() {
       </button>
       {/* Video player */}
       {videoUrl && (
-        <ReactPlayer
-          url={videoUrl}
-          controls={true}
-          width="100%"
-          height="100%"
-        />
+        <div data-vjs-player>
+          <video ref={videoRef} className="video-js vjs-default-skin" />
+        </div>
       )}
 
       <form
