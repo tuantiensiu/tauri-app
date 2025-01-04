@@ -2,9 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
-import ReactPlayer from "react-player";
 import videojs from "video.js";
 import { getBlobUrl } from "./fetch-video";
+import { Command } from "@tauri-apps/plugin-shell";
+import * as path from "@tauri-apps/api/path";
+
+import {
+  BaseDirectory,
+  readTextFile,
+  writeTextFile,
+} from "@tauri-apps/plugin-fs";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -27,6 +34,43 @@ function App() {
       };
     }
   }, [videoUrl]);
+  useEffect(() => {
+    createFile();
+    readFile();
+    const initRun = async () => {
+      await runShellCommand();
+    };
+    initRun();
+  }, []);
+
+  const runShellCommand = async () => {
+    try {
+      // let result1 = await Command.create("exec-sh", ["-c", "ls"]).execute();
+      // console.log(result1);
+      const pathDocument = await path.documentDir();
+      const command = Command.sidecar("binaries/static-web-server", [
+        `-p 8787 -d ${pathDocument} -g trace`,
+      ]);
+      const result = await command.execute();
+      console.log("execute ", result);
+    } catch (error) {
+      console.log("error: ", error);
+    }
+  };
+
+  const createFile = async () => {
+    const contents = "Hello, World!";
+    await writeTextFile("test.txt", contents, {
+      baseDir: BaseDirectory.Document,
+    });
+    console.log("file created");
+  };
+  const readFile = async () => {
+    const file = await readTextFile("test.txt", {
+      baseDir: BaseDirectory.Document,
+    });
+    console.log("content: ", file);
+  };
 
   const playVideo = async (url: string) => {
     const urlPlaylist = await getBlobUrl(url, true);
@@ -70,6 +114,13 @@ function App() {
         Play Video Playlist
       </button>
       {/* Video player */}
+      {/* <button
+        onClick={() => {
+          runShellCommand();
+        }}
+      >
+        runShellCommand
+      </button> */}
       {videoUrl && (
         <div data-vjs-player>
           <video ref={videoRef} className="video-js vjs-default-skin" />
