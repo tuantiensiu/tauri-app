@@ -1,5 +1,4 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use actix_files::Files;
 use actix_web::{App, HttpServer};
 use std::thread;
@@ -10,9 +9,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let sys = actix_web::rt::System::new();
         sys.block_on(async {
             HttpServer::new(|| {
-                App::new().service(Files::new("/", "/Users/tien/Documents").show_files_listing())
+                App::new().service(
+                    Files::new(
+                        "/",
+                        "/storage/emulated/0/Android/data/com.tauri_app.app/files/Documents",
+                    )
+                    .show_files_listing()
+                    .use_last_modified(true),
+                )
             })
-            .bind("127.0.0.1:3030")
+            .bind("0.0.0.0:3030") // Changed from 127.0.0.1 to 0.0.0.0
             .unwrap()
             .run()
             .await

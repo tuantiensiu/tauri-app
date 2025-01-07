@@ -34,14 +34,14 @@ function App() {
       };
     }
   }, [videoUrl]);
-  // useEffect(() => {
-  //   createFile();
-  //   readFile();
-  //   const initRun = async () => {
-  //     await runShellCommand();
-  //   };
-  //   initRun();
-  // }, []);
+  useEffect(() => {
+    createFile();
+    readFile();
+    // const initRun = async () => {
+    //   await runShellCommand();
+    // };
+    // initRun();
+  }, []);
 
   const runShellCommand = async () => {
     try {
