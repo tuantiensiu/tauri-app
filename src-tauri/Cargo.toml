@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
+build = "build.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -25,4 +26,7 @@ serde_json = "1"
 static-web-server = "=2.34.0"
 tauri-plugin-shell = "2"
 tauri-plugin-fs = "2"
+actix-web = "4.9.0"
+actix-files = "0.6.6"
+tokio = "1.42.0"
 
